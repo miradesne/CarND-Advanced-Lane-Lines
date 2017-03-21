@@ -71,7 +71,7 @@ def pipeline(img, objpoints, imgpoints, left_line, right_line, visualize=True):
 	threshed, color_binary = img_from_thresh(undistorted)
 	binaries = [img, threshed, color_binary]
 	titles = ['Original Image', 'Image after applying color and gradient thresholds', 'Color binary from each threshold']
-	showImgs(binaries, titles)
+	# showImgs(binaries, titles)
 
 	img_size = (undistorted.shape[1], undistorted.shape[0])
 
@@ -80,6 +80,9 @@ def pipeline(img, objpoints, imgpoints, left_line, right_line, visualize=True):
 
 	src = [[592, 450], [687, 450], [1120, img_size[1]], [198, img_size[1]]]
 	dst = np.float32([[x_offset, y_offset], [img_size[0]-x_offset, y_offset], [img_size[0]-x_offset, img_size[1]-y_offset], [x_offset, img_size[1]-y_offset]])
+	
+	# print("src\n", src, "\ndst\n", dst)
+
 	warped = warp(threshed, np.array(src, np.float32), dst, img_size)
 	Minv = cv2.getPerspectiveTransform(dst, np.array(src, np.float32))
 
@@ -124,7 +127,7 @@ def process_video_img(img):
 	return pipeline(img, objpoints, imgpoints, left_line, right_line, visualize=True)
 
 
-process_video_img(imgs[0])
+process_video_img(imgs[1])
 # for img in imgs:
 # 	pipeline(img, objpoints, imgpoints, Line(), Line())
 

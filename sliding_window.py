@@ -3,11 +3,10 @@ import cv2
 import matplotlib.pyplot as plt
 
 # y_eval is where we want to define the curvature.
-def curvature(y_pix, x_pix, leftx, rightx, ploty):
+def curvature(x_pix, y_pix, leftx, rightx, ploty):
 	ym_per_pix = float(30/y_pix) # meters per pixel in y dimension
 	xm_per_pix = 3.7/x_pix # meters per pixel in x dimension
-	y_eval = y_pix
-	print(x_pix, y_pix)
+	y_eval = y_pix # measure at the bottom of the view
 	# Fit new polynomials to x,y in world space
 	left_fit_cr = np.polyfit(ploty*ym_per_pix, leftx*xm_per_pix, 2)
 	right_fit_cr = np.polyfit(ploty*ym_per_pix, rightx*xm_per_pix, 2)
@@ -15,7 +14,6 @@ def curvature(y_pix, x_pix, leftx, rightx, ploty):
 	left_curverad = ((1 + (2*left_fit_cr[0]*y_eval*ym_per_pix + left_fit_cr[1])**2)**1.5) / np.absolute(2*left_fit_cr[0])
 	right_curverad = ((1 + (2*right_fit_cr[0]*y_eval*ym_per_pix + right_fit_cr[1])**2)**1.5) / np.absolute(2*right_fit_cr[0])
 	# Now our radius of curvature is in meters
-	# print(left_curverad, 'm', right_curverad, 'm')
 	return left_curverad, right_curverad
 
 def find_lanes(binary_warped, margin=100, minpix=50, nwindows=9, visualize=True):
@@ -153,4 +151,4 @@ def find_next_lanes(binary_warped, left_fit, right_fit, margin=100, visualize=Tr
 		plt.ylim(720, 0)
 		plt.show()
 
-	return left_fit, right_fit, leftx, rightx, ploty
+	return left_fit, right_fit, left_fitx, right_fitx, ploty

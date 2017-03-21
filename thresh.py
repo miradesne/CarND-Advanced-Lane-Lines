@@ -82,7 +82,7 @@ def img_from_thresh(img, h_thresh=(15, 30), s_thresh=(170, 255), sx_thresh=(20, 
 	# Stack each channel
 	# Note color_binary[:, :, 0] is all 0s, effectively an all black image. It might
 	# be beneficial to replace this channel with something else.
-	color_binary = np.dstack((h_binary, sxbinary, s_binary))
+	color_binary = np.dstack((mag_binary, sxbinary, s_binary))
 
 	combined = np.zeros_like(sxbinary)
 

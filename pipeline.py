@@ -34,24 +34,22 @@ class Line():
 		#polynomial coefficients averaged over the last n iterations
 		self.best_fit = None  
 		#radius of curvature of the line in some units
-		self.radius_of_curvature = None 
+		# self.radius_of_curvature = None 
 		#distance in meters of vehicle center from the line
-		self.line_base_pos = None 
+		# self.line_base_pos = None 
 		#difference in fit coefficients between last and new fits
-		self.diffs = np.array([0,0,0], dtype='float') 
+		# self.diffs = np.array([0,0,0], dtype='float') 
 		#x values for detected line pixels
-		self.allx = None  
-		#y values for detected line pixels
-		self.ally = None
+		# self.allx = None  
+		# #y values for detected line pixels
+		# self.ally = None
 
 	def set_x_fit(self, x_fit):
-		print("single", x_fit.shape)
 		if self.detected == False:
 			self.recent_xfitted = np.array([x_fit])
 		else:
 			self.recent_xfitted = np.append(self.recent_xfitted, [x_fit], axis=0)
-		print("x_fit", self.recent_xfitted.shape)
-		if len(self.recent_xfitted) > self.n:
+		if self.recent_xfitted.shape[0] > self.n:
 			self.recent_xfitted = np.delete(self.recent_xfitted, 0, 0)
 		self.bestx = np.average(self.recent_xfitted, axis=0)
 
@@ -60,11 +58,9 @@ class Line():
 			self.recent_fit = np.array([fit])
 		else:
 			self.recent_fit = np.append(self.recent_fit, [fit], axis=0)
-		print(self.recent_fit.shape)
-		if len(self.recent_fit) > self.n:
+		if self.recent_fit.shape[0] > self.n:
 			self.recent_fit = np.delete(self.recent_fit, 0, 0)
 		self.best_fit = np.average(self.recent_fit, axis=0)
-		# print("Mira", self.best_fit.shape)
 
 
 
@@ -75,7 +71,7 @@ def pipeline(img, objpoints, imgpoints, left_line, right_line, visualize=True):
 	threshed, color_binary = img_from_thresh(undistorted)
 	binaries = [img, threshed, color_binary]
 	titles = ['Original Image', 'Image after applying color and gradient thresholds', 'Color binary from each threshold']
-	# showImgs(binaries, titles)
+	showImgs(binaries, titles)
 
 	img_size = (undistorted.shape[1], undistorted.shape[0])
 
@@ -101,7 +97,6 @@ def pipeline(img, objpoints, imgpoints, left_line, right_line, visualize=True):
 	if left_line.detected == False:
 		left_fit, right_fit, left_fitx, right_fitx, ploty = find_lanes(warped, visualize=visualize)
 	else:
-		print(left_line.best_fit.shape)
 		left_fit, right_fit, left_fitx, right_fitx, ploty = find_next_lanes(warped, left_line.best_fit, right_line.best_fit, visualize=visualize)
 
 	left_line.set_x_fit(left_fitx)
@@ -111,7 +106,12 @@ def pipeline(img, objpoints, imgpoints, left_line, right_line, visualize=True):
 	left_line.detected = True
 	right_line.detected = True
 
-	curvature(warped.shape[1], warped.shape[0], left_fitx, right_fitx, ploty)
+	# calculate the size of the perspective transform destination window
+	dst_frame_x = warped.shape[1] - 2 * x_offset
+	dst_frame_y = warped.shape[0] - 2 * y_offset
+	# use the window size to calcuate the curvature of the lane in real life.
+	left_curverad, right_curverad = curvature(dst_frame_x, dst_frame_y, left_fitx, right_fitx, ploty)
+	print(left_curverad, "m", right_curverad, "m")
 
 	output = draw_lane(undistorted, warped, left_fitx, right_fitx, ploty, Minv, visualize=visualize)
 
@@ -121,17 +121,18 @@ left_line = Line()
 right_line = Line()
 
 def process_video_img(img):
-	return pipeline(img, objpoints, imgpoints, left_line, right_line, visualize=False)
+	return pipeline(img, objpoints, imgpoints, left_line, right_line, visualize=True)
 
 
-for img in imgs:
-	process_video_img(img)
+process_video_img(imgs[0])
+# for img in imgs:
+# 	pipeline(img, objpoints, imgpoints, Line(), Line())
 
 # Import everything needed to edit/save/watch video clips
 from moviepy.editor import VideoFileClip
 
-# white_output = 'test_output.mp4'
-# clip1 = VideoFileClip('test.mp4')
+# white_output = 'project_output.mp4'
+# clip1 = VideoFileClip('project_video.mp4')
 # # prev_lines = []
 # # smooth = True
 # white_clip = clip1.fl_image(process_video_img) #NOTE: this function expects color images!!

@@ -1,8 +1,3 @@
-## Writeup Template
-### You can use this file as a template for your writeup if you want to submit it as a markdown file, but feel free to use some other method and submit a pdf if you prefer.
-
----
-
 **Advanced Lane Finding Project**
 
 The goals / steps of this project are the following:
@@ -62,7 +57,7 @@ I used a combination of color and gradient thresholds to generate a binary image
 
 I transformed the color space to hsl, and use both h and s channels. I also use the x sobel oprator to get the horizontal gradient. With these two, I then combine them with the gradient direction and magnitude thresholds.
 
-Here's an example of my output for this step.  (note: this is not actually from one of the test images)
+Here's an example of my output for this step. 
 
 ![alt text][image3]
 
@@ -73,19 +68,17 @@ The code for my perspective transform includes a function called `warp()` in `ca
 ```
 x_offset = 320
 y_offset = 0
-src = [
-		[592, 450], 
+src = [[592, 450],
 		[687, 450], 
 		[1120, img_size[1]], 
-		[198, img_size[1]]
-	  ]
+		[198, img_size[1]]]
 
 dst = np.float32([
-		[x_offset, y_offset], 
-		[img_size[0]-x_offset, y_offset], 
-		[img_size[0]-x_offset, img_size[1]-y_offset], 
-		[x_offset, img_size[1]-y_offset]
-		])
+	[x_offset, y_offset], 
+	[img_size[0]-x_offset, y_offset], 
+	[img_size[0]-x_offset, img_size[1]-y_offset], 
+	[x_offset, img_size[1]-y_offset]
+])
 
 ```
 This resulted in the following source and destination points:
@@ -101,23 +94,23 @@ I verified that my perspective transform was working as expected by drawing the 
 
 ![alt text][image4]
 
-####4. Describe how (and identify where in your code) you identified lane-line pixels and fit their positions with a polynomial?
+#### 4. Describe how (and identify where in your code) you identified lane-line pixels and fit their positions with a polynomial?
 
-I used the sliding window procedure from the lessons and defined a function called `find_lanes()` in `sliding_window.py`. It uses a histogram from the warped image, go from the midle of the image, and search for lanes indexes. After it gets all the coordinates of the lane lines, it uses `np.polyfit()` to fit a 2nd order polynomial line on the region.
+I used the sliding window procedure from the lessons and defined a function called `find_lanes()` in `sliding_window.py`. It uses a histogram from the warped image, go from the middle of the image, and search for lanes indexes. After it gets all the coordinates of the lane lines, it uses `np.polyfit()` to fit a 2nd order polynomial line on the region.
 
 Here's an output of the fit lines:
 
 ![alt text][image5]
 
-####5. Describe how (and identify where in your code) you calculated the radius of curvature of the lane and the position of the vehicle with respect to center.
+#### 5. Describe how (and identify where in your code) you calculated the radius of curvature of the lane and the position of the vehicle with respect to center.
 
 I did this in function `curvature()` in my code in `sliding_window.py`. The function takes an input of a warped image, the x coordinates of the polynomial fitted lines, and returns the curvature in meters. 
 
 I used the formula described in the lesson(R = (1+(2Ay+B)^2)^1.5 / |2A|), and time all the parameters with the pixel-to-meter ratio to get the real world length. The curvature measured is on the bottom of the image, where it's the closest to the car.
 
-an example output of the curvatures is 404.518674424 m 287.199316844 m.
+An example output of the curvatures is 404.518674424 m 287.199316844 m.
 
-####6. Provide an example image of your result plotted back down onto the road such that the lane area is identified clearly.
+#### 6. Provide an example image of your result plotted back down onto the road such that the lane area is identified clearly.
 
 I implemented this step in lines 40 through 60 in my code in `utilities.py` in the function `draw_lane()`.
 I use an inverse matrix to warp the shape back to the original shape, and use `cv2.polyfill()` to fill up the lane area.
@@ -127,18 +120,18 @@ Here is an example of my result on a test image:
 
 ---
 
-###Pipeline (video)
+### Pipeline (video)
 
-####1. Provide a link to your final video output.  Your pipeline should perform reasonably well on the entire project video (wobbly lines are ok but no catastrophic failures that would cause the car to drive off the road!).
+#### 1. Provide a link to your final video output.  Your pipeline should perform reasonably well on the entire project video (wobbly lines are ok but no catastrophic failures that would cause the car to drive off the road!).
 
 Here's a [link to my video result](./project_output.mp4)
 
 ---
 
-###Discussion
+### Discussion
 
-####1. Briefly discuss any problems / issues you faced in your implementation of this project.  Where will your pipeline likely fail?  What could you do to make it more robust?
+#### 1. Briefly discuss any problems / issues you faced in your implementation of this project.  Where will your pipeline likely fail?  What could you do to make it more robust?
 
-One approach I did was to use the previous fitted lane lines as a starting point for the next line search. The function is called `find_next_lanes()` in `sliding_window.py`. I also use an average of most recent 5 lines instead of the exact last lines to produce a smoothier result and prevent error. It worked on part of the roads where the shades make detection very hard. 
+One approach I did was to use the previous fitted lane lines as a starting point for the next line search. The function is called `find_next_lanes()` in `sliding_window.py`. I also use an average of most recent 5 lines instead of the exact last lines to produce a smoothier result and prevent error. It worked well on parts of the roads where the shades make detection very hard. 
 
-However I think I can improve the thresholds to detect better lane lines. At some areas there are a lot of noices especially the edge of the road can have great gradient. In that case the car may try to identify that as the lines instead of the real yellow lines. I think we can use deep learning to extract the features out and identify if they are lane lines, or just some edges with great gradient.
+However I think I can improve the thresholds to detect better lane lines. At some areas there are a lot of noices. One noice that makes it especially hard to detect is the edge of the road. It can have great gradient. In that case the algorithm may try to identify that as the lane lines instead of the real yellow lines exposed in the sun and have a much smaller contrast. I think we can use deep learning to extract the features out.  The model can use te features to identify if they are lane lines, or just some edges with great gradient.

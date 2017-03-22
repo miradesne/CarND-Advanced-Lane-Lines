@@ -109,14 +109,11 @@ def pipeline(img, objpoints, imgpoints, left_line, right_line, visualize=True):
 	left_line.detected = True
 	right_line.detected = True
 
-	# calculate the size of the perspective transform destination window
-	dst_frame_x = warped.shape[1] - 2 * x_offset
-	dst_frame_y = warped.shape[0] - 2 * y_offset
 	# use the window size to calcuate the curvature of the lane in real life.
-	left_curverad, right_curverad = curvature(dst_frame_x, dst_frame_y, left_fitx, right_fitx, ploty)
-	print(left_curverad, "m", right_curverad, "m")
+	left_curverad, right_curverad, offset = curvature(warped.shape[1], warped.shape[0], left_fitx, right_fitx, ploty)
+	curvStr = "left: %d m, right: %d m, offset: %.2f m" % (left_curverad, right_curverad, offset)
 
-	output = draw_lane(undistorted, warped, left_fitx, right_fitx, ploty, Minv, visualize=visualize)
+	output = draw_lane(undistorted, warped, left_fitx, right_fitx, ploty, Minv, curvStr, visualize=visualize)
 
 	return output
 
@@ -124,22 +121,20 @@ left_line = Line()
 right_line = Line()
 
 def process_video_img(img):
-	return pipeline(img, objpoints, imgpoints, left_line, right_line, visualize=True)
+	return pipeline(img, objpoints, imgpoints, left_line, right_line, visualize=False)
 
 
-process_video_img(imgs[1])
+# process_video_img(imgs[2])
 # for img in imgs:
 # 	pipeline(img, objpoints, imgpoints, Line(), Line())
 
 # Import everything needed to edit/save/watch video clips
 from moviepy.editor import VideoFileClip
 
-# white_output = 'project_output.mp4'
-# clip1 = VideoFileClip('project_video.mp4')
-# # prev_lines = []
-# # smooth = True
-# white_clip = clip1.fl_image(process_video_img) #NOTE: this function expects color images!!
-# white_clip.write_videofile(white_output, audio=False)
+white_output = 'project_output.mp4'
+clip1 = VideoFileClip('project_video.mp4')
+white_clip = clip1.fl_image(process_video_img) 
+white_clip.write_videofile(white_output, audio=False)
 
 print("done.")
 # input("press")

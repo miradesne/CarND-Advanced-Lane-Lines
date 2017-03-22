@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 
 # y_eval is where we want to define the curvature.
 def curvature(x_pix, y_pix, leftx, rightx, ploty):
+
 	ym_per_pix = float(30/y_pix) # meters per pixel in y dimension
 	xm_per_pix = 3.7/x_pix # meters per pixel in x dimension
 	y_eval = y_pix # measure at the bottom of the view
@@ -14,7 +15,19 @@ def curvature(x_pix, y_pix, leftx, rightx, ploty):
 	left_curverad = ((1 + (2*left_fit_cr[0]*y_eval*ym_per_pix + left_fit_cr[1])**2)**1.5) / np.absolute(2*left_fit_cr[0])
 	right_curverad = ((1 + (2*right_fit_cr[0]*y_eval*ym_per_pix + right_fit_cr[1])**2)**1.5) / np.absolute(2*right_fit_cr[0])
 	# Now our radius of curvature is in meters
-	return left_curverad, right_curverad
+
+	# Calculate the distance between car center and lane center
+	# Get the left and right lane x position on the bottom of the image
+	left_start = leftx[-1] 
+	right_start = rightx[-1]
+
+	# Calculate lane center
+	lane_center = left_start + (right_start - left_start) / 2
+	car_center = x_pix / 2
+
+	# Transform to real world length
+	offset = abs(lane_center - car_center) * xm_per_pix
+	return left_curverad, right_curverad, offset
 
 def find_lanes(binary_warped, margin=100, minpix=50, nwindows=9, visualize=True):
 	# Take a histogram of the bottom half of the image

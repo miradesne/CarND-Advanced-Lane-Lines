@@ -37,7 +37,7 @@ def region_of_interest(img, vertices):
 	return masked_image
 
 
-def draw_lane(image, warped, left_fitx, right_fitx, ploty, Minv, visualize=True):
+def draw_lane(image, warped, left_fitx, right_fitx, ploty, Minv, curvature, visualize=True):
 	# Create an image to draw the lines on
 	warp_zero = np.zeros_like(warped).astype(np.uint8)
 	color_warp = np.dstack((warp_zero, warp_zero, warp_zero))
@@ -54,6 +54,10 @@ def draw_lane(image, warped, left_fitx, right_fitx, ploty, Minv, visualize=True)
 	newwarp = cv2.warpPerspective(color_warp, Minv, (image.shape[1], image.shape[0])) 
 	# Combine the result with the original image
 	result = cv2.addWeighted(image, 1, newwarp, 0.3, 0)
+
+	font = cv2.FONT_HERSHEY_SIMPLEX
+	result = cv2.putText(result,curvature,(50,100), font, 1.2,(255,0,0),3)
+
 	if visualize:
 		plt.imshow(result)
 		plt.show()
